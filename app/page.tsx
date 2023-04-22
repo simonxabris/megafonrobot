@@ -4,6 +4,7 @@ import { FormEvent, useState } from "react";
 import { Input } from "../components/ui/input";
 import { Button } from "../components/ui/button";
 import { Loader2, Send } from "lucide-react";
+import clsx from "clsx";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -49,8 +50,12 @@ const Home = () => {
       <h1 className="text-xl font-bold">Megafon robot ready to serve</h1>
       <p>{answer}</p>
       <form className="w-full flex flex-col sm:flex-row" onSubmit={onSubmit}>
-        <Input placeholder="" name="prompt" />
-        <Button disabled={loading} className="mt-2 sm:ml-2 sm:mt-0">
+        <Input
+          className={`${clsx(loading === true && "opacity-40")}`}
+          placeholder=""
+          name="prompt"
+        />
+        <Button disabled={loading} className={`mt-2 sm:ml-2 sm:mt-0 `}>
           Send
           {loading ? (
             <Loader2 className="ml-2 h-4 w-4 animate-spin" />
