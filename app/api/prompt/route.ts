@@ -14,7 +14,6 @@ const corsHeaders = {
     "authorization, x-client-info, apikey, content-type",
 };
 
-export const runtime = "edge";
 export const POST = async (request: Request) => {
   const { query } = await request.json();
 
