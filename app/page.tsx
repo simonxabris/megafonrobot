@@ -42,7 +42,10 @@ const Home = () => {
   };
 
   return (
-    <main className="dark:bg-black flex min-h-screen flex-col items-center justify-between p-8">
+    <main
+      style={{ minHeight: "100svh" }}
+      className="dark:bg-black flex flex-col items-center justify-between p-8"
+    >
       <h1 className="text-xl font-bold">Megafon robot ready to serve</h1>
       <p>{answer}</p>
       <form className="w-full flex" onSubmit={onSubmit}>
