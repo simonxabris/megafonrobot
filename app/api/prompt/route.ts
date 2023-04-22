@@ -4,11 +4,11 @@ import { Configuration, OpenAIApi } from "openai";
 import { stripIndent, oneLine } from "common-tags";
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
-const supabaseKey = process.env.SUPABASE_KEY;
+const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
 
-export const supabaseClient = createClient(supabaseUrl!, supabaseKey!);
+const supabaseClient = createClient(supabaseUrl!, supabaseKey!);
 
-export const corsHeaders = {
+const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Headers":
     "authorization, x-client-info, apikey, content-type",
