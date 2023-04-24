@@ -33,7 +33,7 @@ export const GET = async (request: Request) => {
     {
       method: "POST",
       headers: {
-        Authorization: `Bearer: ${process.env.OPENAI_API_KEY}`,
+        Authorization: `Bearer ${process.env.OPENAI_API_KEY}`,
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
@@ -45,7 +45,7 @@ export const GET = async (request: Request) => {
 
   const embeddingData = await embeddingResponse.json();
 
-  const [{ embedding }] = embeddingData.data.data;
+  const [{ embedding }] = embeddingData.data;
 
   // Fetching whole documents for this simple example.
   //
@@ -99,7 +99,7 @@ export const GET = async (request: Request) => {
     {
       method: "POST",
       headers: {
-        Authorization: `Bearer: ${process.env.OPENAI_API_KEY}`,
+        Authorization: `Bearer ${process.env.OPENAI_API_KEY}`,
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
@@ -116,7 +116,7 @@ export const GET = async (request: Request) => {
   const {
     id,
     choices: [{ text }],
-  } = completionData.data;
+  } = completionData;
 
   return new Response(JSON.stringify({ id, text }), {
     headers: {
