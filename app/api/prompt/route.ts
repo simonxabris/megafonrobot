@@ -47,7 +47,7 @@ export const GET = async (request: Request) => {
   // smaller sections at earlier pre-processing/embedding step.
   const response = await supabaseClient.rpc("match_documents", {
     query_embedding: embedding,
-    similarity_threshold: 0.5, // Choose an appropriate threshold for your data
+    similarity_threshold: 0.7, // Choose an appropriate threshold for your data
     match_count: 10, // Choose the number of matches
   });
 
