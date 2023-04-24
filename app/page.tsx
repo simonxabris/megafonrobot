@@ -23,18 +23,18 @@ const Home = () => {
 
     const formData = new FormData(event.target as HTMLFormElement);
 
-    const prompt = formData.get("prompt");
+    const prompt = formData.get("prompt") as string;
 
     if (!prompt) {
       return;
     }
 
-    const response = await fetch("/api/prompt", {
-      method: "POST",
-      body: JSON.stringify({
-        query: prompt,
-      }),
-    });
+    const response = await fetch(
+      `/api/prompt?query=${encodeURIComponent(prompt)}`,
+      {
+        method: "GET",
+      }
+    );
 
     const { text } = await response.json();
 

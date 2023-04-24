@@ -14,8 +14,16 @@ const corsHeaders = {
     "authorization, x-client-info, apikey, content-type",
 };
 
-export const POST = async (request: Request) => {
-  const { query } = await request.json();
+export const GET = async (request: Request) => {
+  const url = new URL(request.url);
+
+  const params = url.searchParams;
+
+  const query = params.get("query");
+
+  if (!query) {
+    return new Response("Bad Request", { status: 400 });
+  }
 
   // OpenAI recommends replacing newlines with spaces for best results
   const input = query.replace(/\n/g, " ");
@@ -95,6 +103,10 @@ export const POST = async (request: Request) => {
   } = completionResponse.data;
 
   return new Response(JSON.stringify({ id, text }), {
-    headers: { ...corsHeaders, "Content-Type": "application/json" },
+    headers: {
+      ...corsHeaders,
+      "Content-Type": "application/json",
+      "Cache-control": "public, max-age=86400",
+    },
   });
 };
