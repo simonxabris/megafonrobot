@@ -11,7 +11,7 @@ const inter = Inter({ subsets: ["latin"] });
 const presets = [
   "Mit gondolsz Karácsony Gergelyrol?",
   "Ki mozgatja Karácsony Gergelyt?",
-  "Mit fedezett fel Bohár Dániel?",
+  "Mit buktatott le legutóbb Bohár Dániel?",
   "Miért támadja Brüsszel Magyarországot?",
 ];
 
