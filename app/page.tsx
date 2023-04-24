@@ -51,6 +51,7 @@ const Home = () => {
       <p>{answer}</p>
       <form className="w-full flex flex-col sm:flex-row" onSubmit={onSubmit}>
         <Input
+          disabled={loading}
           className={`${clsx(loading === true && "opacity-40")}`}
           placeholder=""
           name="prompt"
