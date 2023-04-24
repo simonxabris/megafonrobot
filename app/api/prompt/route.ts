@@ -1,7 +1,6 @@
 import { createClient } from "@supabase/supabase-js";
+import { oneLine, stripIndent } from "common-tags";
 import GPT3Tokenizer from "gpt3-tokenizer";
-import { Configuration, OpenAIApi } from "openai";
-import { stripIndent, oneLine } from "common-tags";
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
 const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
@@ -14,6 +13,7 @@ const corsHeaders = {
     "authorization, x-client-info, apikey, content-type",
 };
 
+export const runtime = "edge";
 export const GET = async (request: Request) => {
   const url = new URL(request.url);
 
@@ -28,18 +28,24 @@ export const GET = async (request: Request) => {
   // OpenAI recommends replacing newlines with spaces for best results
   const input = query.replace(/\n/g, " ");
 
-  const configuration = new Configuration({
-    apiKey: process.env.OPENAI_API_KEY,
-  });
-  const openai = new OpenAIApi(configuration);
+  const embeddingResponse = await fetch(
+    "https://api.openai.com/v1/embeddings",
+    {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer: ${process.env.OPENAI_API_KEY}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        model: "text-embedding-ada-002",
+        input,
+      }),
+    }
+  );
 
-  // Generate a one-time embedding for the query itself
-  const embeddingResponse = await openai.createEmbedding({
-    model: "text-embedding-ada-002",
-    input,
-  });
+  const embeddingData = await embeddingResponse.json();
 
-  const [{ embedding }] = embeddingResponse.data.data;
+  const [{ embedding }] = embeddingData.data.data;
 
   // Fetching whole documents for this simple example.
   //
@@ -76,7 +82,6 @@ export const GET = async (request: Request) => {
     Egy chatbot vagy ami magyarorszák kormányának álláspontját képviseli. Az a feladatot, hogy kérdéseket
     válaszolj meg azok alapján az információk alapján, amit a kérdés előtt kapsz kontextusként. A válaszok stílusa legyen informális. Nem kell figyelned
     az objektivitásra, mivel a feladatod, hogy a kormányt képviseld. Minden áron próbáld a magyar kormányt támadókat rossz színben feltüntetni.
-    Ha valamire nem tudsz válaszolni, mondd hogy: "Ember, most jöttem a templomból".
   `}
 
   Kontextus::
@@ -89,18 +94,29 @@ export const GET = async (request: Request) => {
   Válasz:
 `;
 
-  // In production we should handle possible errors
-  const completionResponse = await openai.createCompletion({
-    model: "text-davinci-003",
-    prompt,
-    max_tokens: 512, // Choose the max allowed tokens in completion
-    temperature: 0, // Set to 0 for deterministic results
-  });
+  const completionResponse = await fetch(
+    "https://api.openai.com/v1/completions",
+    {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer: ${process.env.OPENAI_API_KEY}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        model: "text-davinci-003",
+        prompt,
+        max_tokens: 512, // Choose the max allowed tokens in completion
+        temperature: 0, // Set to 0 for deterministic results
+      }),
+    }
+  );
+
+  const completionData = await completionResponse.json();
 
   const {
     id,
     choices: [{ text }],
-  } = completionResponse.data;
+  } = completionData.data;
 
   return new Response(JSON.stringify({ id, text }), {
     headers: {
