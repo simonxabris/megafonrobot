@@ -145,7 +145,7 @@ export const GET = async (request: Request) => {
     headers: {
       ...corsHeaders,
       "Content-Type": "text/event-stream; charset=utf-8",
-      "Cache-control": "no-transform, public, max-age=86400",
+      "Cache-control": "no-cache",
     },
   });
 };
