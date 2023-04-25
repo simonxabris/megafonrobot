@@ -145,7 +145,7 @@ export const GET = async (request: Request) => {
     headers: {
       ...corsHeaders,
       "Content-Type": "application/json",
-      "Cache-control": "public, max-age=86400",
+      "Cache-control": "no-transform, public, max-age=86400",
     },
   });
 };
