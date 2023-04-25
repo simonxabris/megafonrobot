@@ -149,27 +149,3 @@ export const GET = async (request: Request) => {
     },
   });
 };
-
-function createSSETransformFunction() {
-  let arr = [];
-  let dataDone = false;
-
-  return async function (chunk, controller) {
-    const text = chunk;
-    const lines = text.split("\n");
-    for (const line of lines) {
-      if (line.length === 0) continue; // ignore empty message
-      if (line.startsWith(":")) continue; // ignore sse comment message
-      if (line === "data: [DONE]") {
-        dataDone = true;
-        break;
-      }
-      const json = JSON.parse(line.substring(6));
-      console.log(json);
-      controller.enqueue(line + "\n"); // Reassemble the transformed stream
-    }
-    if (dataDone) {
-      controller.close(); // Close the stream if the data is done
-    }
-  };
-}
