@@ -51,9 +51,9 @@ const Home = () => {
       return;
     }
 
-    const reader = response.body
-      .pipeThrough(new TextDecoderStream())
-      .getReader();
+    const reader = response.body.getReader();
+
+    const textDecoder = new TextDecoder();
 
     // Read data from the stream
     async function readData() {
@@ -66,9 +66,10 @@ const Home = () => {
           return;
         }
 
+        const text = textDecoder.decode(value);
         // Process the value (chunk of text) here
-        console.log("Received chunk:", value);
-        setAnswer((a) => a + value);
+        console.log("Received chunk:", text);
+        setAnswer((a) => a + text);
 
         // Continue reading the stream
         await readData();
