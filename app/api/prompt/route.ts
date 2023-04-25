@@ -144,9 +144,8 @@ export const GET = async (request: Request) => {
   return new Response(outputReadableStream, {
     headers: {
       ...corsHeaders,
-      "Content-Type": "text/plain; charset=utf-8",
+      "Content-Type": "text/event-stream; charset=utf-8",
       "Cache-control": "no-transform, public, max-age=86400",
-      "Transfer-encoding": "chunked",
     },
   });
 };
