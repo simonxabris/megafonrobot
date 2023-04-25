@@ -71,13 +71,14 @@ const Home = () => {
         setAnswer((a) => a + value);
 
         // Continue reading the stream
-        readData();
+        await readData();
       } catch (error) {
         console.error("Error reading the stream:", error);
+        setAnswer("Error reading stream");
       }
     }
 
-    readData();
+    await readData();
   };
 
   const presetClick = (preset: string) => {
