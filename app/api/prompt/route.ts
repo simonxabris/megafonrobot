@@ -146,6 +146,7 @@ export const GET = async (request: Request) => {
       ...corsHeaders,
       "Content-Type": "text/plain; charset=utf-8",
       "Cache-control": "no-transform, public, max-age=86400",
+      "Transfer-encoding": "chunked",
     },
   });
 };
