@@ -45,13 +45,7 @@ const Home = () => {
       }
     );
 
-    if (!response.body) {
-      setAnswer("Szerver hiba, probald ujra");
-      setLoading(false);
-      return;
-    }
-
-    const reader = response.body.getReader();
+    const reader = response.body!.getReader();
 
     const textDecoder = new TextDecoder();
 
