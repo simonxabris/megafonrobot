@@ -61,13 +61,14 @@ const Home = () => {
         const { value, done } = await reader.read();
         if (done) {
           console.log("Stream has been fully read.");
+          setAnswer((a) => a + "Done");
           setLoading(false);
           return;
         }
 
         // Process the value (chunk of text) here
         console.log("Received chunk:", value);
-        setAnswer((a) => a + value.slice(0, value.length + 1));
+        setAnswer((a) => a + value);
 
         // Continue reading the stream
         readData();
