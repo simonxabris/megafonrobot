@@ -16,12 +16,13 @@ const presets = [
 ];
 
 const Home = () => {
-  const [answer, setAnswer] = useState<string | undefined>();
+  const [answer, setAnswer] = useState<string>("");
   const [loading, setLoading] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
 
   const onSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
+    setAnswer("");
 
     if (loading) {
       return;
@@ -44,10 +45,38 @@ const Home = () => {
       }
     );
 
-    const { text } = await response.json();
+    if (!response.body) {
+      setAnswer("Szerver hiba, probald ujra");
+      setLoading(false);
+      return;
+    }
 
-    setAnswer(text);
-    setLoading(false);
+    const reader = response.body
+      .pipeThrough(new TextDecoderStream())
+      .getReader();
+
+    // Read data from the stream
+    async function readData() {
+      try {
+        const { value, done } = await reader.read();
+        if (done) {
+          console.log("Stream has been fully read.");
+          setLoading(false);
+          return;
+        }
+
+        // Process the value (chunk of text) here
+        console.log("Received chunk:", value);
+        setAnswer((a) => a + value.slice(0, value.length + 1));
+
+        // Continue reading the stream
+        readData();
+      } catch (error) {
+        console.error("Error reading the stream:", error);
+      }
+    }
+
+    readData();
   };
 
   const presetClick = (preset: string) => {
@@ -65,7 +94,7 @@ const Home = () => {
       className="dark:bg-black flex flex-col items-center justify-between p-2 sm:p-8"
     >
       <h1 className="text-xl font-bold">Megafon Robot szolgálatra kész</h1>
-      {answer ? (
+      {answer.length > 0 ? (
         <p>{answer}</p>
       ) : loading ? (
         <Loader2 className="animate-spin" />
