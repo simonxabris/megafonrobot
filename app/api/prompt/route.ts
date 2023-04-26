@@ -1,6 +1,11 @@
 import { createClient } from "@supabase/supabase-js";
 import { oneLine, stripIndent } from "common-tags";
 import GPT3Tokenizer from "gpt3-tokenizer";
+import {
+  createParser,
+  ParsedEvent,
+  ReconnectInterval,
+} from "eventsource-parser";
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
 const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
@@ -114,33 +119,46 @@ export const POST = async (request: Request) => {
     return new Response("Failed to generate answer", { status: 500 });
   }
 
-  const textEncoder = new TextEncoder();
+  const encoder = new TextEncoder();
+  const decoder = new TextDecoder();
+  let counter = 0;
 
-  const transformStream = new TransformStream({
-    async transform(chunk, controller) {
-      const text = chunk;
-      const lines = text.split("\n");
-      for (const line of lines) {
-        if (line.length === 0) continue; // ignore empty message
-        if (line.startsWith(":")) continue; // ignore sse comment message
-        if (line === "data: [DONE]") {
-          controller.terminate(); // Close the stream if the data is done
-          break;
+  const stream = new ReadableStream({
+    async start(controller) {
+      function onParse(event: ParsedEvent | ReconnectInterval) {
+        if (event.type === "event") {
+          const data = event.data;
+          if (data === "[DONE]") {
+            controller.close();
+            return;
+          }
+          try {
+            const json = JSON.parse(data);
+            const text = json.choices[0].text;
+            if (counter < 2 && (text.match(/\n/) || []).length) {
+              return;
+            }
+            const queue = encoder.encode(text);
+            controller.enqueue(queue);
+            counter++;
+          } catch (e) {
+            controller.error(e);
+          }
         }
-        const json = JSON.parse(line.substring(6));
-        const choiceText = json.choices?.[0]?.text || "";
+      }
 
-        const encodedEvent = textEncoder.encode(choiceText);
-        controller.enqueue(encodedEvent);
+      // stream response (SSE) from OpenAI may be fragmented into multiple chunks
+      // this ensures we properly read chunks & invoke an event for each SSE event stream
+      const parser = createParser(onParse);
+
+      // https://web.dev/streams/#asynchronous-iteration
+      for await (const chunk of completionResponse.body as any) {
+        parser.feed(decoder.decode(chunk));
       }
     },
   });
 
-  const outputReadableStream = completionResponse.body
-    .pipeThrough(new TextDecoderStream())
-    .pipeThrough(transformStream);
-
-  return new Response(outputReadableStream, {
+  return new Response(stream, {
     headers: {
       ...corsHeaders,
       "Content-Type": "text/plain; charset=utf-8",
