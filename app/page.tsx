@@ -5,6 +5,8 @@ import { Input } from "../components/ui/input";
 import { Button } from "../components/ui/button";
 import { Loader2, Send } from "lucide-react";
 import clsx from "clsx";
+import { Prompt } from "../components/question";
+import { Conversation } from "./types";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -14,15 +16,21 @@ const presets = [
   "Mit buktatott le legutóbb Bohár Dániel?",
   "Miért támadja Brüsszel Magyarországot?",
 ];
+const questions = [
+  {
+    role: "user",
+    content: "Hogy tervezi Gyurcsany Ferenc elfoglalni a bal oldalt?",
+  },
+];
 
 const Home = () => {
-  const [answer, setAnswer] = useState<string>("");
+  const [answer, setAnswer] = useState<string | undefined>();
+  const [conversation, setConversation] = useState<Conversation[]>([]);
   const [loading, setLoading] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
 
   const onSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    setAnswer("");
 
     if (loading) {
       return;
@@ -38,19 +46,28 @@ const Home = () => {
       return;
     }
 
+    const newConversation: Conversation[] = [
+      ...conversation,
+      { content: prompt, role: "user" },
+    ];
+
+    setConversation(newConversation);
+
     const response = await fetch(`/api/prompt`, {
       method: "POST",
       headers: {
         "Content-type": "application/json",
       },
       body: JSON.stringify({
-        prompt,
+        prompt: newConversation,
       }),
     });
 
     const reader = response.body!.getReader();
 
     const textDecoder = new TextDecoder();
+
+    setConversation((c) => [...c, { role: "system", content: "" }]);
 
     // Read data from the stream
     async function readData() {
@@ -63,7 +80,12 @@ const Home = () => {
 
         const text = textDecoder.decode(value);
 
-        setAnswer((a) => a + text);
+        setConversation((c) => {
+          return [
+            ...c.slice(0, -1),
+            { role: "system", content: `${c.at(-1).content}${text}` },
+          ];
+        });
 
         // Continue reading the stream
         await readData();
@@ -90,31 +112,46 @@ const Home = () => {
       className="dark:bg-black flex flex-col items-center justify-between p-2 sm:p-8"
     >
       <h1 className="text-xl font-bold">Megafon Robot szolgálatra kész</h1>
-      {answer.length > 0 ? (
-        <p>{answer}</p>
-      ) : loading ? (
-        <Loader2 className="animate-spin" />
-      ) : (
-        <div>
-          <p className="text-center mb-8">
-            Válassz az alábbi kérdések közül vagy írj egy sajátot:
-          </p>
-          <div className="flex flex-col sm:grid gap-4 sm:grid-cols-3 sm:grid-rows-3">
-            {presets.map((preset, index) => (
-              <Button
-                type="button"
-                onClick={() => presetClick(preset)}
-                variant="secondary"
-                key={index}
-              >
-                {preset}
-              </Button>
-            ))}
-          </div>
-        </div>
-      )}
 
-      <form className="w-full flex flex-col sm:flex-row" onSubmit={onSubmit}>
+      <div className="overflow-scroll">
+        {conversation.length > 0 ? (
+          <>
+            {conversation.map(({ content, role }) => (
+              <>
+                <Prompt className="mb-8">
+                  <p className="mb-4">
+                    {role === "system" ? "V" : "K"}: {content}
+                  </p>
+                </Prompt>
+              </>
+            ))}
+          </>
+        ) : loading ? (
+          <Loader2 className="animate-spin" />
+        ) : (
+          <div>
+            <p className="text-center mb-8">
+              Válassz az alábbi kérdések közül vagy írj egy sajátot:
+            </p>
+            <div className="flex flex-col sm:grid gap-4 sm:grid-cols-3 sm:grid-rows-3">
+              {presets.map((preset, index) => (
+                <Button
+                  type="button"
+                  onClick={() => presetClick(preset)}
+                  variant="secondary"
+                  key={index}
+                >
+                  {preset}
+                </Button>
+              ))}
+            </div>
+          </div>
+        )}
+      </div>
+      <form
+        className="fixed bottom-0 inset-x-0 p-2 sm:p-8 bg-black  w-full flex flex-col sm:flex-row"
+        onSubmit={onSubmit}
+      >
         <Input
           ref={inputRef}
           disabled={loading}

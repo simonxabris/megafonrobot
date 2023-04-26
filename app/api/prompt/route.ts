@@ -6,6 +6,7 @@ import {
   ParsedEvent,
   ReconnectInterval,
 } from "eventsource-parser";
+import { Conversation } from "../../types";
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
 const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
@@ -22,14 +23,16 @@ export const runtime = "edge";
 export const POST = async (request: Request) => {
   const body = await request.json();
 
-  const query = body.prompt;
+  const conversation = body.prompt as Conversation[];
 
-  if (!query) {
+  if (!conversation) {
     return new Response("Bad Request", { status: 400 });
   }
 
+  console.log(conversation);
+
   // OpenAI recommends replacing newlines with spaces for best results
-  const input = query.replace(/\n/g, " ");
+  const input = conversation.at(-1)?.content.replace(/\n/g, " ");
 
   const embeddingResponse = await fetch(
     "https://api.openai.com/v1/embeddings",
@@ -91,14 +94,16 @@ export const POST = async (request: Request) => {
   ${contextText}
 
   Kérdés: """
-  ${query}
+  ${conversation.at(-1)?.content}
   """
 
   Válasz:
 `;
 
+  conversation.at(-1).content = prompt;
+
   const completionResponse = await fetch(
-    "https://api.openai.com/v1/completions",
+    "https://api.openai.com/v1/chat/completions",
     {
       method: "POST",
       headers: {
@@ -106,8 +111,8 @@ export const POST = async (request: Request) => {
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        model: "text-davinci-003",
-        prompt,
+        model: "gpt-3.5-turbo",
+        messages: conversation,
         max_tokens: 512,
         temperature: 0,
         stream: true,
@@ -134,13 +139,17 @@ export const POST = async (request: Request) => {
           }
           try {
             const json = JSON.parse(data);
-            const text = json.choices[0].text;
-            if (counter < 2 && (text.match(/\n/) || []).length) {
-              return;
+
+            const text = json.choices[0].delta?.content;
+
+            if (text) {
+              if (counter < 1 && (text.match(/\n/) || []).length) {
+                return;
+              }
+              const queue = encoder.encode(text);
+              controller.enqueue(queue);
+              counter++;
             }
-            const queue = encoder.encode(text);
-            controller.enqueue(queue);
-            counter++;
           } catch (e) {
             controller.error(e);
           }
@@ -153,6 +162,7 @@ export const POST = async (request: Request) => {
 
       // https://web.dev/streams/#asynchronous-iteration
       for await (const chunk of completionResponse.body as any) {
+        console.log("chunk", decoder.decode(chunk));
         parser.feed(decoder.decode(chunk));
       }
     },
