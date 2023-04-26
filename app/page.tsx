@@ -40,6 +40,9 @@ const Home = () => {
 
     const response = await fetch(`/api/prompt`, {
       method: "POST",
+      headers: {
+        "Content-type": "application/json",
+      },
       body: JSON.stringify({
         prompt,
       }),
