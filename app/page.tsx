@@ -111,9 +111,9 @@ const Home = () => {
       style={{ minHeight: "100svh" }}
       className="dark:bg-black flex flex-col items-center justify-between p-2 sm:p-8"
     >
-      <h1 className="text-xl font-bold">Megafon Robot szolgálatra kész</h1>
+      <h1 className="text-xl font-bold mb-4">Megafon Robot szolgálatra kész</h1>
 
-      <div className="flex-1 overflow-y-auto flex flex-col justify-center">
+      <div className="flex-1 overflow-y-auto flex flex-col justify-center pb-32">
         {conversation.length > 0 ? (
           <>
             {conversation.map(({ content, role }) => (
@@ -149,7 +149,7 @@ const Home = () => {
         )}
       </div>
       <form
-        className="fixed bottom-0 inset-x-0 p-2 sm:p-8 bg-black  w-full flex flex-col sm:flex-row"
+        className="h-32 fixed bottom-0 inset-x-0 p-2 sm:p-8 bg-black  w-full flex flex-col sm:flex-row"
         onSubmit={onSubmit}
       >
         <Input
