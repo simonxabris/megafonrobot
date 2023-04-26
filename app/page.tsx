@@ -76,6 +76,7 @@ const Home = () => {
         const { value, done } = await reader.read();
         if (done) {
           setLoading(false);
+          inputRef.current!.value = "";
           return;
         }
 
@@ -107,6 +108,11 @@ const Home = () => {
         new Event("submit", { cancelable: true, bubbles: true })
       );
     }
+  };
+
+  const reset = () => {
+    setConversation([]);
+    inputRef.current!.value = "";
   };
 
   return (
@@ -165,14 +171,24 @@ const Home = () => {
           placeholder=""
           name="prompt"
         />
-        <Button disabled={loading} className={`mt-2 sm:ml-2 sm:mt-0 `}>
-          Küldés
-          {loading ? (
-            <Loader2 className="ml-2 h-4 w-4 animate-spin" />
-          ) : (
-            <Send className="ml-2 h-4 w-4" />
-          )}
-        </Button>
+        <div className="flex flex-row justify-center gap-2">
+          <Button
+            type="button"
+            variant="outline"
+            className="mt-2 sm:ml-2 sm:mt-0"
+            onClick={reset}
+          >
+            Chat törlés
+          </Button>
+          <Button disabled={loading} className={`flex-1 mt-2 sm:ml-2 sm:mt-0 `}>
+            Küldés
+            {loading ? (
+              <Loader2 className="ml-2 h-4 w-4 animate-spin" />
+            ) : (
+              <Send className="ml-2 h-4 w-4" />
+            )}
+          </Button>
+        </div>
       </form>
     </main>
   );
