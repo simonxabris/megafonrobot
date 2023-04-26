@@ -162,7 +162,6 @@ export const POST = async (request: Request) => {
 
       // https://web.dev/streams/#asynchronous-iteration
       for await (const chunk of completionResponse.body as any) {
-        console.log("chunk", decoder.decode(chunk));
         parser.feed(decoder.decode(chunk));
       }
     },

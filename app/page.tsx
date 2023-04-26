@@ -113,7 +113,7 @@ const Home = () => {
     >
       <h1 className="text-xl font-bold">Megafon Robot szolgálatra kész</h1>
 
-      <div className="overflow-scroll">
+      <div className="flex-1 overflow-y-auto flex flex-col justify-center">
         {conversation.length > 0 ? (
           <>
             {conversation.map(({ content, role }) => (
