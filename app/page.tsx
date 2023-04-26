@@ -57,21 +57,17 @@ const Home = () => {
       try {
         const { value, done } = await reader.read();
         if (done) {
-          console.log("Stream has been fully read.");
-          setAnswer((a) => a + "Done");
           setLoading(false);
           return;
         }
 
         const text = textDecoder.decode(value);
-        // Process the value (chunk of text) here
-        console.log("Received chunk:", text);
+
         setAnswer((a) => a + text);
 
         // Continue reading the stream
         await readData();
       } catch (error) {
-        console.error("Error reading the stream:", error);
         setAnswer("Error reading stream");
       }
     }
