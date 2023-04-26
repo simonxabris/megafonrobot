@@ -28,6 +28,7 @@ const Home = () => {
   const [conversation, setConversation] = useState<Conversation[]>([]);
   const [loading, setLoading] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
+  const chatRef = useRef<HTMLDivElement>(null);
 
   const onSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -87,6 +88,8 @@ const Home = () => {
           ];
         });
 
+        chatRef.current!.scrollTop = chatRef.current!.scrollHeight;
+
         // Continue reading the stream
         await readData();
       } catch (error) {
@@ -113,7 +116,10 @@ const Home = () => {
     >
       <h1 className="text-xl font-bold mb-4">Megafon Robot szolgálatra kész</h1>
 
-      <div className="flex-1 overflow-y-auto flex flex-col justify-center pb-32">
+      <div
+        ref={chatRef}
+        className="flex-1 overflow-y-auto flex flex-col justify-center pb-32"
+      >
         {conversation.length > 0 ? (
           <>
             {conversation.map(({ content, role }) => (
