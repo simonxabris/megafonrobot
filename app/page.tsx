@@ -1,11 +1,11 @@
 "use client";
+import clsx from "clsx";
+import { Loader2, Send } from "lucide-react";
 import { Inter } from "next/font/google";
 import { FormEvent, useRef, useState } from "react";
-import { Input } from "../components/ui/input";
-import { Button } from "../components/ui/button";
-import { Loader2, Send } from "lucide-react";
-import clsx from "clsx";
 import { Prompt } from "../components/question";
+import { Button } from "../components/ui/button";
+import { Input } from "../components/ui/input";
 import { Conversation } from "./types";
 
 const inter = Inter({ subsets: ["latin"] });
@@ -130,7 +130,11 @@ const Home = () => {
           <>
             {conversation.map(({ content, role }) => (
               <>
-                <Prompt className="mb-8">
+                <Prompt
+                  className={clsx("mb-8", [
+                    role === "system" && "bg-slate-800",
+                  ])}
+                >
                   <p className="mb-4">
                     {role === "system" ? "V" : "K"}: {content}
                   </p>

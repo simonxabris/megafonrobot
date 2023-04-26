@@ -87,7 +87,7 @@ export const POST = async (request: Request) => {
   const prompt = stripIndent`${oneLine`
     Helyezd magad egy FIDESZ kozeli ujsagiro szerepeben akinek a feladata, hogy propaganda hireket allitson elo es barmi aron megvedje a magyar kormany allaspontjat.
     Az objektivitasra egyaltalan nem kell odafigyelned, hasznald fel a valaszokhoz a "Kontextus"-kent megkapott szoveget es probalj az alapjan valaszolni
-    a kerdesekre. A valaszaid legyenek informalisak, fiatalosak es enyhen passziv aggressziv stilusuak.
+    a kerdesekre. A valaszaid stilusa legyen aggressziv, tamado es trágár.
   `}
 
   Kontextus:
