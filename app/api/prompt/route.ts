@@ -100,7 +100,7 @@ export const POST = async (request: Request) => {
   Válasz:
 `;
 
-  conversation.at(-1).content = prompt;
+  conversation.at(-1)!.content = prompt;
 
   const completionResponse = await fetch(
     "https://api.openai.com/v1/chat/completions",

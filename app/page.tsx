@@ -83,7 +83,7 @@ const Home = () => {
         setConversation((c) => {
           return [
             ...c.slice(0, -1),
-            { role: "system", content: `${c.at(-1).content}${text}` },
+            { role: "system", content: `${c.at(-1)!.content}${text}` },
           ];
         });
 
