@@ -12,9 +12,9 @@ const inter = Inter({ subsets: ["latin"] });
 
 const presets = [
   "Mit gondolsz Karácsony Gergelyrol?",
-  "Ki mozgatja Karácsony Gergelyt?",
-  "Mit buktatott le legutóbb Bohár Dániel?",
+  "Szerinted az árnyék kormány jobb munkát végez mint az igazi?",
   "Miért támadja Brüsszel Magyarországot?",
+  "Soros György miért pénzeli az ellenzéket?",
 ];
 const questions = [
   {
