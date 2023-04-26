@@ -15,25 +15,6 @@ const presets = [
   "Miért támadja Brüsszel Magyarországot?",
 ];
 
-function handleIncomingStream(url: string | URL) {
-  const eventSource = new EventSource(url);
-
-  eventSource.addEventListener("message", (event) => {
-    const data = event.data;
-    console.log("Received chunk:", data);
-  });
-
-  eventSource.addEventListener("done", () => {
-    console.log("Stream has been fully read.");
-    eventSource.close();
-  });
-
-  eventSource.addEventListener("error", (error) => {
-    console.error("Error reading the stream:", error);
-    eventSource.close();
-  });
-}
-
 const Home = () => {
   const [answer, setAnswer] = useState<string>("");
   const [loading, setLoading] = useState(false);
@@ -57,28 +38,42 @@ const Home = () => {
       return;
     }
 
-    const eventSource = new EventSource(
-      `/api/prompt?query=${encodeURIComponent(prompt)}`
-    );
+    const response = await fetch(`/api/prompt`, {
+      method: "POST",
+      body: JSON.stringify({
+        prompt,
+      }),
+    });
+
+    const reader = response.body!.getReader();
+
     const textDecoder = new TextDecoder();
 
-    eventSource.addEventListener("message", (event) => {
-      const data = event.data;
-      setAnswer((a) => a + data);
-      console.log("Received chunk:", data);
-    });
+    // Read data from the stream
+    async function readData() {
+      try {
+        const { value, done } = await reader.read();
+        if (done) {
+          console.log("Stream has been fully read.");
+          setAnswer((a) => a + "Done");
+          setLoading(false);
+          return;
+        }
 
-    eventSource.addEventListener("done", () => {
-      console.log("Stream has been fully read.");
-      setLoading(false);
-      eventSource.close();
-    });
+        const text = textDecoder.decode(value);
+        // Process the value (chunk of text) here
+        console.log("Received chunk:", text);
+        setAnswer((a) => a + text);
 
-    eventSource.addEventListener("error", (error) => {
-      console.error("Error reading the stream:", error);
-      setLoading(false);
-      eventSource.close();
-    });
+        // Continue reading the stream
+        await readData();
+      } catch (error) {
+        console.error("Error reading the stream:", error);
+        setAnswer("Error reading stream");
+      }
+    }
+
+    await readData();
   };
 
   const presetClick = (preset: string) => {

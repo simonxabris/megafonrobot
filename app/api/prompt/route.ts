@@ -14,12 +14,10 @@ const corsHeaders = {
 };
 
 export const runtime = "edge";
-export const GET = async (request: Request) => {
-  const url = new URL(request.url);
+export const POST = async (request: Request) => {
+  const body = await request.json();
 
-  const params = url.searchParams;
-
-  const query = params.get("query");
+  const query = body.prompt;
 
   if (!query) {
     return new Response("Bad Request", { status: 400 });
@@ -117,7 +115,6 @@ export const GET = async (request: Request) => {
   }
 
   const textEncoder = new TextEncoder();
-  let idCounter = 0;
 
   const transformStream = new TransformStream({
     async transform(chunk, controller) {
@@ -127,19 +124,14 @@ export const GET = async (request: Request) => {
         if (line.length === 0) continue; // ignore empty message
         if (line.startsWith(":")) continue; // ignore sse comment message
         if (line === "data: [DONE]") {
-          const eventString = `id: ${idCounter}\nevent: done\ndata: null\n\n`;
-          const encodedEvent = textEncoder.encode(eventString);
-          controller.enqueue(encodedEvent);
           controller.terminate(); // Close the stream if the data is done
           break;
         }
         const json = JSON.parse(line.substring(6));
         const choiceText = json.choices?.[0]?.text || "";
 
-        const eventString = `id: ${idCounter}\nevent: message\ndata: ${choiceText}\n\n`;
-        const encodedEvent = textEncoder.encode(eventString);
+        const encodedEvent = textEncoder.encode(choiceText);
         controller.enqueue(encodedEvent);
-        idCounter++;
       }
     },
   });
@@ -151,7 +143,7 @@ export const GET = async (request: Request) => {
   return new Response(outputReadableStream, {
     headers: {
       ...corsHeaders,
-      "Content-Type": "text/event-stream; charset=utf-8",
+      "Content-Type": "text/plain; charset=utf-8",
       "Cache-control": "no-cache",
     },
   });
