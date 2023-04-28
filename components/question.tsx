@@ -8,6 +8,8 @@ export type PromptProps = {
 
 export function Prompt({ children, className }: PromptProps) {
   return (
-    <p className={cn([className, "bg-slate-900 p-4 rounded-md"])}>{children}</p>
+    <p className={cn(["bg-slate-900 p-4 rounded-md max-w-prose", className])}>
+      {children}
+    </p>
   );
 }
