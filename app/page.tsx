@@ -7,6 +7,7 @@ import { Prompt } from "../components/question";
 import { Button } from "../components/ui/button";
 import { Input } from "../components/ui/input";
 import { Conversation } from "./types";
+import va from "@vercel/analytics";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -42,6 +43,8 @@ const Home = () => {
     const formData = new FormData(event.target as HTMLFormElement);
 
     const prompt = formData.get("prompt") as string;
+
+    va.track("Question asked", { question: prompt });
 
     if (!prompt) {
       return;
@@ -102,6 +105,7 @@ const Home = () => {
   };
 
   const presetClick = (preset: string) => {
+    va.track("Preset click", { preset });
     if (inputRef.current) {
       inputRef.current.value = preset;
       inputRef.current.form?.dispatchEvent(
